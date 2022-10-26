@@ -84,15 +84,15 @@ test('Confluence Unsupervised Setup:', async t => {
     .click('a.aui-button[data-action="DISABLE"]');
 
   // Admin settings - set Confluence path to localhost
-  if (!CONFIG.BASE_URL.includes('localhost')) {
-    const baseUrl = CONFIG.BASE_URL.replace(/(http[s]?:\/\/)(.*)(:.*)/g, '$1localhost$3');
-    console.log(`- Setting Confluence base url to: ${baseUrl}`);
-    await t
-      .navigateTo(`${CONFIG.BASE_URL}/admin/editgeneralconfig.action`) //
-      .typeText('#editbaseurl', baseUrl, { paste: true, replace: true });
-
-    const submitButton = Selector('#confirm');
-    await t.scrollIntoView(submitButton).wait(2000).click(submitButton).wait(3000);
-    await t.expect(await getLocation()).eql(`${baseUrl}/admin/viewgeneralconfig.action`);
-  }
+  // if (!CONFIG.BASE_URL.includes('localhost')) {
+  //   const baseUrl = CONFIG.BASE_URL.replace(/(http[s]?:\/\/)(.*)(:.*)/g, '$1localhost$3');
+  //   console.log(`- Setting Confluence base url to: ${baseUrl}`);
+  //   await t
+  //     .navigateTo(`${CONFIG.BASE_URL}/admin/editgeneralconfig.action`) //
+  //     .typeText('#editbaseurl', baseUrl, { paste: true, replace: true });
+  //
+  //   const submitButton = Selector('#confirm');
+  //   await t.scrollIntoView(submitButton).wait(2000).click(submitButton).wait(3000);
+  //   await t.expect(await getLocation()).eql(`${baseUrl}/admin/viewgeneralconfig.action`);
+  // }
 });
