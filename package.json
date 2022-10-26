@@ -4,7 +4,7 @@
   "description": "A puppeteer based script to automate the initial setup of Confluence for testing purposes ",
   "main": "src/main/confluence-setup.ts",
   "scripts": {
-    "start": "npm run clean; testcafe firefox src/main/confluence-setup.ts",
+    "start": "npm run clean; testcafe chrome src/main/confluence-setup.ts",
     "clean": "rimraf screenshots/*.png, screenshots/thumbnails",
     "lint": "eslint src --fix"
   },

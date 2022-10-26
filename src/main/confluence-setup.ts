@@ -1,7 +1,7 @@
 import { ClientFunction, fixture, Selector } from 'testcafe';
 
 const CONFIG = {
-  BASE_URL: process.env.PPTR_CONFLUENCE_BASE_URL || 'http://localhost:8090/confluence',
+  BASE_URL: process.env.PPTR_CONFLUENCE_BASE_URL || 'http://confluence:8090/confluence',
   CONFLUENCE_LICENSE:
     process.env.PPTR_CONFLUENCE_LICENSE ||
     `AAABlQ0ODAoPeNptkV1vmzAUhu/9KyztZrugMpBkJZKlZcAWJEiWhW2qlBvXOwS3xma2IaW/fhQaq ZMm+cY+R37ej3dl3eGCDZgsMSHrkKwXCxwnJQ5IEKBHGH6CsUIr6q8I+Uhuw9BHu665B7OvfthxR n1CUKyVY9ztWAN007aVMIBL4LXSUp8FWJznMeJaVTfjluiBOtMB+tYZXjMLCXNAX3geCT0/QLngo CykT60wwzTslBSNcPD7SkoLJiRlnOtOOduygd1L+MRm9A3XDZLzJ1tma1rEl/hL8pCsos/i68O5e CpSv3SXxyy6pL+ScL+pD+3dn22/YrsoP8A2enb+QfdRtr1z8nCiJ4pGnnKgmOJvdY2iQ4/4nr+c3 R0dMw4MrZi0cPWRJTTPkmO68/xwEd2SRYDGC/3nYW/OTAnL3EvU/00wUxzFBqaNN4EtxzOzX2nl0 MLUQ7wvivR7nG3yaxbXKgOUgOVGtBNtTLSSHYzG8PsjmB7MBzx2iqd2T2sc66YBwwWT+BWB0p7Jb tY6O/0LJs/CLDAtAhUAjaBXSxbSxugiFDveN2w5Kc8nZTICFBXOBgbyE/cGG0btPFo+tfGUlJjjX 02jj`,
@@ -56,11 +56,9 @@ test('Confluence Unsupervised Setup:', async t => {
     .click('#setup-next-button');
 
   // Setup Admins User
-  const form = Selector('#blankChoiceForm > input[type=submit]');
-  await t.expect(form.exists).ok({ timeout: 120000 });
-  // await t.expect(await getLocation()).eql(`${CONFIG.BASE_URL}/setup/setupdata-start.action`);
+  const formButton = Selector('#blankChoiceForm > input[type=submit]', { timeout: 120000 });
   console.log('- Setup Admin User ');
-  await t.click(form);
+  await t.click(formButton);
 
   await t.expect(await getLocation()).eql(`${CONFIG.BASE_URL}/setup/setupusermanagementchoice-start.action`);
   await t.click('#internal');
@@ -74,7 +72,7 @@ test('Confluence Unsupervised Setup:', async t => {
     .click('#setup-next-button');
 
   // Admin settings - disable Confluence onboarding module
-  console.log(`- Disable Confluence Onboarding module`);
+  console.log(`- Disable Confluence Onboarding Module`);
   await t
     .click('#further-configuration') //
     .typeText('#password', ADMIN_USER.password, { paste: true })
@@ -89,10 +87,12 @@ test('Confluence Unsupervised Setup:', async t => {
   if (!CONFIG.BASE_URL.includes('localhost')) {
     const baseUrl = CONFIG.BASE_URL.replace(/(http[s]?:\/\/)(.*)(:.*)/g, '$1localhost$3');
     console.log(`- Setting Confluence base url to: ${baseUrl}`);
-    t.navigateTo(`${CONFIG.BASE_URL}/admin/editgeneralconfig.action`)
-      .click('#editbaseurl')
-      .typeText('#editbaseurl', baseUrl, { paste: true, replace: true })
-      .click('#confirm')
-      .click('#confirm');
+    await t
+      .navigateTo(`${CONFIG.BASE_URL}/admin/editgeneralconfig.action`) //
+      .typeText('#editbaseurl', baseUrl, { paste: true, replace: true });
+
+    const submitButton = Selector('#confirm');
+    await t.scrollIntoView(submitButton).wait(2000).click(submitButton).wait(3000);
+    await t.expect(await getLocation()).eql(`${baseUrl}/admin/viewgeneralconfig.action`);
   }
 });

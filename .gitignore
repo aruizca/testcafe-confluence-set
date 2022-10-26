@@ -1,4 +1,4 @@
 screenshots/*.png
 node_modules/
 .idea
-screenshots/thumbnails
+screenshots/
