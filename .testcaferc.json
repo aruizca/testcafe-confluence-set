@@ -1,0 +1,15 @@
+{
+  "screenshots": {
+    "path": "./screenshots",
+    "takeOnFails": true,
+    "pathPattern": "${DATE}/${TIME}_${TEST}.png",
+    "fullPage": true
+  },
+  "skipJsErrors": true,
+  "concurrency": 1,
+  "selectorTimeout": 120000,
+  "assertionTimeout": 120000,
+  "pageRequestTimeout": 120000,
+  "takeOnFails": true,
+  "cache": true
+}
