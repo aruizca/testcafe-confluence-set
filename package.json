@@ -2,9 +2,11 @@
   "name": "puppeteer-confluence-setup",
   "version": "1.0.0",
   "description": "A puppeteer based script to automate the initial setup of Confluence for testing purposes ",
-  "main": "setup.js",
+  "main": "src/main/confluence-setup.ts",
   "scripts": {
-    "start": "node setup.js"
+    "start": "npm run clean; testcafe --page-request-timeout 120000 --skip-js-errors --screenshots takeOnFails firefox src/main/confluence-setup.ts",
+    "clean": "rimraf screenshots/*.png",
+    "lint": "eslint src --fix"
   },
   "repository": {
     "type": "git",
@@ -12,7 +14,7 @@
   },
   "keywords": [
     "confluence",
-    "puppeteer",
+    "testcafe",
     "setup",
     "automation"
   ],
@@ -23,7 +25,15 @@
   },
   "homepage": "https://github.com/aruizca/puppeteer-confluence-setup#readme",
   "dependencies": {
-    "puppeteer": "^2.1.1",
     "rimraf": "^3.0.2"
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "5.41.0",
+    "@typescript-eslint/parser": "5.41.0",
+    "eslint": "8.22.0",
+    "eslint-plugin-functional": "4.4.1",
+    "eslint-plugin-import": "2.26.0",
+    "eslint-plugin-prettier": "4.2.1",
+    "testcafe": "2.0.1"
   }
 }
