@@ -1,13 +1,13 @@
 import { ClientFunction, fixture, Selector } from 'testcafe';
 
 const CONFIG = {
-  BASE_URL: process.env.PPTR_CONFLUENCE_BASE_URL || 'http://confluence:8090/confluence',
+  BASE_URL: process.env.TC_CONFLUENCE_BASE_URL || 'http://confluence:8090/confluence',
   CONFLUENCE_LICENSE:
-    process.env.PPTR_CONFLUENCE_LICENSE ||
+    process.env.TC_CONFLUENCE_LICENSE ||
     `AAABlQ0ODAoPeNptkV1vmzAUhu/9KyztZrugMpBkJZKlZcAWJEiWhW2qlBvXOwS3xma2IaW/fhQaq ZMm+cY+R37ej3dl3eGCDZgsMSHrkKwXCxwnJQ5IEKBHGH6CsUIr6q8I+Uhuw9BHu665B7OvfthxR n1CUKyVY9ztWAN007aVMIBL4LXSUp8FWJznMeJaVTfjluiBOtMB+tYZXjMLCXNAX3geCT0/QLngo CykT60wwzTslBSNcPD7SkoLJiRlnOtOOduygd1L+MRm9A3XDZLzJ1tma1rEl/hL8pCsos/i68O5e CpSv3SXxyy6pL+ScL+pD+3dn22/YrsoP8A2enb+QfdRtr1z8nCiJ4pGnnKgmOJvdY2iQ4/4nr+c3 R0dMw4MrZi0cPWRJTTPkmO68/xwEd2SRYDGC/3nYW/OTAnL3EvU/00wUxzFBqaNN4EtxzOzX2nl0 MLUQ7wvivR7nG3yaxbXKgOUgOVGtBNtTLSSHYzG8PsjmB7MBzx2iqd2T2sc66YBwwWT+BWB0p7Jb tY6O/0LJs/CLDAtAhUAjaBXSxbSxugiFDveN2w5Kc8nZTICFBXOBgbyE/cGG0btPFo+tfGUlJjjX 02jj`,
-  DB_USER: process.env.PPTR_DB_USER || 'postgres',
-  DB_PASSWORD: process.env.PPTR_DB_PASSWORD || 'postgres',
-  DB_JDBC_URL: process.env.PPTR_JDBC_URL || 'jdbc:postgresql://postgres:5432/confluence',
+  DB_USER: process.env.TC_DB_USER || 'postgres',
+  DB_PASSWORD: process.env.TC_DB_PASSWORD || 'postgres',
+  DB_JDBC_URL: process.env.TC_JDBC_URL || 'jdbc:postgresql://postgres:5432/confluence',
 };
 
 const ADMIN_USER = {
@@ -24,36 +24,46 @@ fixture('Confluence Unsupervised Setup');
 test('Confluence Unsupervised Setup:', async t => {
   // Select Installation Type
   console.log('- Installation Type as PROD');
-  await t
-    .navigateTo(`${CONFIG.BASE_URL}/setup/setupstart.action`) //
-    .click('#custom')
-    .click('#setup-next-button');
+  await t.navigateTo(`${CONFIG.BASE_URL}`);
+  if ((await getLocation()).includes(`${CONFIG.BASE_URL}/setup/setupstart.action`)) {
+    await t.click('#custom').click('#setup-next-button');
+  }
 
   // Get apps
-  if ((await getLocation()) === `${CONFIG.BASE_URL}/setup/selectbundle.action`) {
+  if ((await getLocation()).includes(`${CONFIG.BASE_URL}/setup/selectbundle.action`)) {
     await t.click('#setup-next-button');
   }
 
   // Add License
-  await t.expect(await getLocation()).eql(`${CONFIG.BASE_URL}/setup/setuplicense.action`);
-  console.log('- License Setup');
-  await t
-    .typeText('#confLicenseString', CONFIG.CONFLUENCE_LICENSE, { paste: true }) //
-    .click('#setupTypeCustom');
+  if ((await getLocation()).includes(`${CONFIG.BASE_URL}/setup/setuplicense.action`)) {
+    console.log('- License Setup');
+    await t
+      .typeText('#confLicenseString', CONFIG.CONFLUENCE_LICENSE, { paste: true }) //
+      .click('#setupTypeCustom');
+  }
+
+  // DC instance setup
+  if ((await getLocation()) === `${CONFIG.BASE_URL}/setup/setupcluster-start.action`) {
+    console.log('- DC license key detected. Configuring single node cluster...');
+    await t
+      .click('#clusteringDisabled') //
+      .click('#skip-button');
+  }
 
   // Configure Database
-  await t.expect(await getLocation()).eql(`${CONFIG.BASE_URL}/setup/setupdbchoice-start.action`);
-  console.log('- Configure Database');
-  await t
-    .click('#custom') //
-    .click('#setup-next-button');
-  // Next sub-screen
-  await t
-    .click('#dbConfigInfo-customize + span + label')
-    .typeText('#dbConfigInfo-databaseUrl', CONFIG.DB_JDBC_URL, { paste: true, replace: true })
-    .typeText('#dbConfigInfo-username', CONFIG.DB_USER, { paste: true })
-    .typeText('#dbConfigInfo-password', CONFIG.DB_PASSWORD, { paste: true })
-    .click('#setup-next-button');
+  if ((await getLocation()).includes('/setup/setupdbtype-start.action') || (await getLocation()).includes('/setup/setupdbchoice-start.action')) {
+    console.log('- Configure Database');
+    await t
+      .click('#custom') //
+      .click('#setup-next-button');
+    // Next sub-screen
+    await t
+      .click('#dbConfigInfo-customize + span + label')
+      .typeText('#dbConfigInfo-databaseUrl', CONFIG.DB_JDBC_URL, { paste: true, replace: true })
+      .typeText('#dbConfigInfo-username', CONFIG.DB_USER, { paste: true })
+      .typeText('#dbConfigInfo-password', CONFIG.DB_PASSWORD, { paste: true })
+      .click('#setup-next-button');
+  }
 
   // Setup Admins User
   const formButton = Selector('#blankChoiceForm > input[type=submit]', { timeout: 120000 });
